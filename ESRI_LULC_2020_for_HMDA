@@ -1,5 +1,5 @@
 var esri_lulc10 = ee.ImageCollection("projects/sat-io/open-datasets/landcover/ESRI_Global-LULC_10m");
-var GHMC = ee.FeatureCollection("projects/ee-sachinbobbili/assets/HMDA");
+var HMDA = ee.FeatureCollection("projects/ee-sachinbobbili/assets/HMDA");
 
 // Define a dictionary which will be used to make legend and visualize image on map
 // 1a5bab,358221,a7d282,87d19e,ffdb5c,eecfa8,ed022a,ede9e4,f2faff,c8c8c8
@@ -18,19 +18,19 @@ var LULC_10m = esri_lulc10.mosaic();
 //For Global dataview
 //Map.addLayer(LULC_10m, {min:1, max:10, palette:dict['colors']}, 'Global_LULC_2020 10m');
 //Clip by geometry
-var GHMC_LULC_2020 = LULC_10m.clip(GHMC);
-Map.addLayer(GHMC_LULC_2020, {min:1, max:10, palette:dict['colors']}, 'GHMC_LULC_2020 10m');
+var HMDA_LULC_2020 = LULC_10m.clip(HMDA);
+Map.addLayer(HMDA_LULC_2020, {min:1, max:10, palette:dict['colors']}, 'HMDA_LULC_2020 10m');
 
 // Area calculation
 // get the area covered by each slope class (sqkm)
-var areaImage = ee.Image.pixelArea().divide(1000*1000).addBands(GHMC_LULC_2020);
+var areaImage = ee.Image.pixelArea().divide(1000*1000).addBands(HMDA_LULC_2020);
 
 var areas = areaImage.reduceRegion({
       reducer: ee.Reducer.sum().group({
       groupField: 1,
       groupName: 'class',
     }),
-  geometry: GHMC.geometry(),
+  geometry: HMDA.geometry(),
   scale: 500,
   //crs: 'EPSG: 32645', //WGS 84 UTM Zone 45
   maxPixels: 1e10
@@ -111,8 +111,8 @@ addCategoricalLegend(legend, dict, 'ESRI 2020 Land Cover');
 
 // Export the image, specifying scale and region.
 Export.image.toDrive({
-  image: GHMC_LULC_2020,
+  image: HMDA_LULC_2020,
   description: 'LULC',
   scale: 100,
-  region: GHMC
+  region: HMDA
 });
